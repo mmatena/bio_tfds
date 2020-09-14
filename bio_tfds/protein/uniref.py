@@ -1,9 +1,4 @@
-"""The UniRef50 dataset.
-
-To download the files, please go to
-https://www.uniprot.org/uniref/?query=identity:0.5 and download all of the
-sequences as both FASTA and tab-separated.
-"""
+"""The UniRef50 dataset."""
 from Bio import SeqIO
 
 import tensorflow as tf
