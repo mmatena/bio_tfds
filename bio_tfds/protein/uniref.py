@@ -50,7 +50,7 @@ def _get_cluster_name(desc_list):
 def _get_word_by_prefix(desc_list, prefix):
     for word in desc_list:
         if word.startswith(prefix):
-            return word[len(prefix):]
+            return word[len(prefix) :]
 
 
 def _get_tax_name(desc_list):
@@ -85,7 +85,7 @@ def _extract_example(seq):
 class UniRef50(tfds.core.GeneratorBasedBuilder):
     """The UniRef50 Dataset."""
 
-    VERSION = tfds.core.Version('1.0.0')
+    VERSION = tfds.core.Version("1.0.0")
 
     UNSTABLE = "The current_release is updated every 8 weeks."
 
@@ -93,33 +93,33 @@ class UniRef50(tfds.core.GeneratorBasedBuilder):
         return tfds.core.DatasetInfo(
             builder=self,
             description=_DESCRIPTION,
-            features=tfds.features.FeaturesDict({
-                # The primary accession number of the UniRef cluster.
-                "unique_identifier": tfds.features.Text(),
-                # The name of the UniRef cluster.
-                "cluster_name": tfds.features.Text(),
-                # The number of UniRef cluster members.
-                "num_members": tf.int32,
-                # The scientific name of the lowest common taxon shared by all
-                # UniRef cluster members.
-                "tax_name": tfds.features.Text(),
-                # Thee id of the lowest common taxon shared by all
-                # UniRef cluster members.
-                "tax_id": tfds.features.Text(),
-                # The entry name of the representative member of the
-                # UniRef cluster.
-                "representative_member": tfds.features.Text(),
-                # The uppercase AA sequence of the protein.
-                'aa_sequence': tfds.features.Text(),
-            }),
-            homepage='https://www.uniprot.org/help/uniref',
+            features=tfds.features.FeaturesDict(
+                {
+                    # The primary accession number of the UniRef cluster.
+                    "unique_identifier": tfds.features.Text(),
+                    # The name of the UniRef cluster.
+                    "cluster_name": tfds.features.Text(),
+                    # The number of UniRef cluster members.
+                    "num_members": tf.int32,
+                    # The scientific name of the lowest common taxon shared by all
+                    # UniRef cluster members.
+                    "tax_name": tfds.features.Text(),
+                    # Thee id of the lowest common taxon shared by all
+                    # UniRef cluster members.
+                    "tax_id": tfds.features.Text(),
+                    # The entry name of the representative member of the
+                    # UniRef cluster.
+                    "representative_member": tfds.features.Text(),
+                    # The uppercase AA sequence of the protein.
+                    "aa_sequence": tfds.features.Text(),
+                }
+            ),
+            homepage="https://www.uniprot.org/help/uniref",
             citation=_CITATION,
         )
 
     def _split_generators(self, dl_manager):
         extracted_path = dl_manager.download_and_extract(_DOWNLOAD_URL)
-        if True:
-            raise ValueError("Point to the correct path.")
         return [
             tfds.core.SplitGenerator(
                 name=tfds.Split.TRAIN,
