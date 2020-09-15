@@ -23,7 +23,7 @@ _ALIASES_DOWNLOAD = "http://stringdb-static.org/download/protein.aliases.v11.0.t
 class StringLinks(tfds.core.GeneratorBasedBuilder):
     VERSION = tfds.core.Version("1.0.0")
 
-    _DOWNLOAD_DIR = "http://stringdb-static.org/download/protein.links.v11.0.txt.gz"
+    _DOWNLOAD_URL = "http://stringdb-static.org/download/protein.links.v11.0.txt.gz"
 
     def __init__(self, data_dir=DEFAULT_TFDS_DATA_DIR, **kwargs):
         super().__init__(data_dir=data_dir, **kwargs)
