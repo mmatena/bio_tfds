@@ -71,8 +71,8 @@ class PfamARegionsUniprot(tfds.core.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, fasta_file):
-        with tf.io.gfile.GFile(fasta_file) as f:
+    def _generate_examples(self, tsv_file):
+        with tf.io.gfile.GFile(tsv_file) as f:
             reader = csv.DictReader(f, delimiter="\t")
             for index, row in enumerate(reader):
                 example = {
