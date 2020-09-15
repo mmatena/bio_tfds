@@ -72,7 +72,9 @@ class PfamARegionsUniprot(tfds.core.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, tsv_file):
+        # TODO(mmatena): GFile seems to be about 6 times slower than open().
         with tf.io.gfile.GFile(tsv_file) as f:
+            # TODO(mmatena): csv.DictReader might be kind of slow.
             reader = csv.DictReader(f, delimiter="\t")
             for index, row in enumerate(reader):
                 example = {
