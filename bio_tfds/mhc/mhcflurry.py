@@ -50,6 +50,8 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
 
     VERSION = tfds.core.Version("1.0.0")
 
+    UNSTABLE = ""
+
     def __init__(
         self,
         normalize_measurement=True,
