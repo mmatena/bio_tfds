@@ -1,0 +1,2 @@
+https://raw.githubusercontent.com/iskandr/cd8-tcell-epitope-prediction-data/master/mhc-sequences/class1_mhc_sequences.csv 4838820 780571b1bf1ae3061f3b55107937e26bf1b262f0b516e25d424a4af11463b33a
+https://raw.githubusercontent.com/iskandr/cd8-tcell-epitope-prediction-data/master/mhcflurry-training-data/peptide-mhc-binding-affinity.csv 22407827 946581ceaec1657055a0f6b70e63225899f225f90db09a42d21f337fce6394c8
