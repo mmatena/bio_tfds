@@ -21,7 +21,7 @@ module add gcc/9.1.0
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
 run_python() {
-  echo "python $PROJECT_DIR/scripts/download_and_prepare_mcflurry.py"
+  echo "python $PROJECT_DIR/scripts/download_and_prepare_mhcflurry.py"
 }
 
 
