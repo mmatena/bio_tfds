@@ -25,9 +25,9 @@ launch() {
   # Not too sure why I have to do it like this, but just running the command
   # causes it fail to launch.
   CMD=$(echo sbatch \
-    --ntasks=12 \
+    --ntasks=20 \
     --time=5- \
-    --mem=32g \
+    --mem=48g \
     --partition=general \
     --wrap="\"$(run_python)\"")
   eval $CMD

@@ -70,10 +70,13 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
                     # Name of MHC allele, e.g. "HLA-A*02:01".
                     "mhc_allele": tfds.features.Text(),
                     # nM affinity (smaller is better), most often an
-                    # IC50 (inhibitory concentration).
+                    # IC50 (inhibitory concentration). If `normalize_measurement` is True
+                    # then this will be converted to a value between 0 and 1 through the
+                    # transformation 1 - log(min(affinity, 50000))/log(50000).
                     "affinity": tf.float32,
                     # One of {=, >, <}. Most often = but < indicates that the measurement
-                    # is an upper bound (and a lower bound >).
+                    # is an upper bound (and a lower bound >). If `include_inequalities`
+                    # is False, then only equalities will be included.
                     "measurement_inequality": tfds.features.ClassLabel(
                         names=_MEASUREMENT_INEQUALITIES
                     ),
