@@ -50,8 +50,6 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
 
     VERSION = tfds.core.Version("1.0.0")
 
-    UNSTABLE = "Probably bad, but I don't want to care about checksums."
-
     def __init__(
         self,
         normalize_measurement=True,
@@ -91,7 +89,7 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        extracted_paths = dl_manager.download_and_extract(
+        extracted_paths = dl_manager.download(
             {
                 "affinity_file": _PEP_MHC_AFFINITY_URL,
                 "mhc_sequence_file": _MHC_SEQUENCE_URL,
