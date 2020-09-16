@@ -50,7 +50,7 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
 
     VERSION = tfds.core.Version("1.0.0")
 
-    UNSTABLE = ""
+    UNSTABLE = "Probably bad, but I don't want to care about checksums."
 
     def __init__(
         self,
