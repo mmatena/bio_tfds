@@ -41,6 +41,11 @@ _PEP_MHC_AFFINITY_URL = "https://raw.githubusercontent.com/iskandr/cd8-tcell-epi
 _MHC_SEQUENCE_URL = "https://raw.githubusercontent.com/iskandr/cd8-tcell-epitope-prediction-data/master/mhc-sequences/class1_mhc_sequences.csv"
 
 
+def _utf_8_encoder(unicode_csv_data):
+    for line in unicode_csv_data:
+        yield line.encode("utf-8")
+
+
 class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
     """Dataset about the binding affinity of peptides to MHC sequences.
 
@@ -116,7 +121,7 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         missing_seqs = 0
 
         with open(affinity_file) as f:
-            reader = csv.DictReader(f, delimiter=",")
+            reader = csv.DictReader(_utf_8_encoder(f), delimiter=",")
             for index, row in enumerate(reader):
                 allele = row["allele"]
                 mhc_sequence = allele_to_sequence.get(allele, None)
