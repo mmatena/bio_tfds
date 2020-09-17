@@ -111,9 +111,11 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         super().__init__(data_dir=data_dir, **kwargs)
         self.include_inequalities = include_inequalities
         self.normalize_measurement = normalize_measurement
-        if not isinstance(species, (list, tuple)):
+        if species and not isinstance(species, (list, tuple)):
             species = [species]
-        self.species = [MhcflurrySpecies.parse(s) for s in species]
+        self.species = (
+            species if not species else [MhcflurrySpecies.parse(s) for s in species]
+        )
 
     def _info(self):
         return tfds.core.DatasetInfo(
