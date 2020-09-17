@@ -111,7 +111,9 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         super().__init__(data_dir=data_dir, **kwargs)
         self.include_inequalities = include_inequalities
         self.normalize_measurement = normalize_measurement
-        self.species = species
+        if not isinstance(species, (list, tuple)):
+            species = [species]
+        self.species = [MhcflurrySpecies.parse(s) for s in species]
 
     def _info(self):
         return tfds.core.DatasetInfo(
@@ -215,8 +217,5 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
                 num_parallel_calls=tf.data.experimental.AUTOTUNE,
             )
         if self.species is not None:
-            ds = ds.map(
-                self._filter_species_fn,
-                num_parallel_calls=tf.data.experimental.AUTOTUNE,
-            )
+            ds = ds.filter(self._filter_species_fn)
         return ds
