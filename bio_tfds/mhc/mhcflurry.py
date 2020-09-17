@@ -3,6 +3,7 @@
 Taken from https://github.com/iskandr/cd8-tcell-epitope-prediction-data
 """
 import csv
+from enum import Enum
 
 import tensorflow as tf
 import tensorflow_datasets.public_api as tfds
@@ -37,6 +38,42 @@ including peptide-MHC binding affinity."""
 
 _MEASUREMENT_INEQUALITIES = ("=", "<", ">")
 
+_SPECIES_PREFIXES = (
+    "HLA",  # Human
+    "Patr",  # Chimpanzee
+    "Gogo",  # Gorilla
+    "Mamu",  # Rhesus macaque
+    "Eqca",  # Horse
+    "BoLA",  # Cow
+    "H-2",  # Mouse
+    "SLA",  # Yeast
+)
+
+
+class MhcflurrySpecies(Enum):
+    """All of the species in the dataset.
+
+    The enum name is a colloquial name for the species
+    while its value is the prefix used in the dataset.
+    """
+
+    @classmethod
+    def parse(cls, x):
+        if isinstance(x, cls):
+            return x
+        else:
+            return getattr(cls, x.upper())
+
+    HUMAN = "HLA"
+    CHIMPANZEE = "Patr"
+    GORILLA = "Gogo"
+    RHESUS_MACAQUE = "Mamu"
+    HORSE = "Eqca"
+    COW = "BoLA"
+    MOUSE = "H-2"
+    YEAST = "SLA"
+
+
 _PEP_MHC_AFFINITY_URL = "https://raw.githubusercontent.com/iskandr/cd8-tcell-epitope-prediction-data/master/mhcflurry-training-data/peptide-mhc-binding-affinity.csv"
 _MHC_SEQUENCE_URL = "https://raw.githubusercontent.com/iskandr/cd8-tcell-epitope-prediction-data/master/mhc-sequences/class1_mhc_sequences.csv"
 
@@ -45,6 +82,13 @@ def normalize_ic50(ic50):
     return 1.0 - tf.math.log(tf.minimum(tf.maximum(ic50, 1.0), 50000.0)) / tf.math.log(
         50000.0
     )
+
+
+def species_from_allele(allele):
+    species = tf.strings.split(allele, sep="-")
+    species = species[..., :-1]
+    species = tf.strings.reduce_join(species, axis=-1, separator="-")
+    return species
 
 
 class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
@@ -60,12 +104,14 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         self,
         normalize_measurement=True,
         include_inequalities=False,
+        species=None,
         data_dir=DEFAULT_TFDS_DATA_DIR,
         **kwargs,
     ):
         super().__init__(data_dir=data_dir, **kwargs)
         self.include_inequalities = include_inequalities
         self.normalize_measurement = normalize_measurement
+        self.species = species
 
     def _info(self):
         return tfds.core.DatasetInfo(
@@ -155,6 +201,10 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         x["affinity"] = normalize_ic50(x["affinity"])
         return x
 
+    def _filter_species_fn(self, x):
+        x_species = species_from_allele(x["mhc_allele"])
+        return tf.reduce_any([tf.equal(s.value, x_species) for s in self.species])
+
     def _as_dataset(self, *args, **kwargs):
         ds = super()._as_dataset(*args, **kwargs)
         if not self.include_inequalities:
@@ -162,6 +212,11 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         if self.normalize_measurement:
             ds = ds.map(
                 self._normalize_measurement_fn,
+                num_parallel_calls=tf.data.experimental.AUTOTUNE,
+            )
+        if self.species is not None:
+            ds = ds.map(
+                self._filter_species_fn,
                 num_parallel_calls=tf.data.experimental.AUTOTUNE,
             )
         return ds
