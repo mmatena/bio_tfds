@@ -72,7 +72,7 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
                     # nM affinity (smaller is better), most often an
                     # IC50 (inhibitory concentration). If `normalize_measurement` is True
                     # then this will be converted to a value between 0 and 1 through the
-                    # transformation 1 - log(min(affinity, 50000))/log(50000).
+                    # transformation 1 - log(min(max(affinity, 1), 50000))/log(50000).
                     "affinity": tf.float32,
                     # One of {=, >, <}. Most often = but < indicates that the measurement
                     # is an upper bound (and a lower bound >). If `include_inequalities`
@@ -147,7 +147,7 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
 
     def _normalize_measurement_fn(self, x):
         x["affinity"] = 1.0 - tf.math.log(
-            tf.minimum(x["affinity"], 50000.0)
+            tf.minimum(tf.maximum(x["affinity"], 1.0), 50000.0)
         ) / tf.math.log(50000.0)
         return x
 
