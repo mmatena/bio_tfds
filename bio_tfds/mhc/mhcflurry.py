@@ -41,6 +41,12 @@ _PEP_MHC_AFFINITY_URL = "https://raw.githubusercontent.com/iskandr/cd8-tcell-epi
 _MHC_SEQUENCE_URL = "https://raw.githubusercontent.com/iskandr/cd8-tcell-epitope-prediction-data/master/mhc-sequences/class1_mhc_sequences.csv"
 
 
+def normalize_ic50(ic50):
+    return 1.0 - tf.math.log(tf.minimum(tf.maximum(ic50, 1.0), 50000.0)) / tf.math.log(
+        50000.0
+    )
+
+
 class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
     """Dataset about the binding affinity of peptides to MHC sequences.
 
@@ -146,9 +152,7 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         )
 
     def _normalize_measurement_fn(self, x):
-        x["affinity"] = 1.0 - tf.math.log(
-            tf.minimum(tf.maximum(x["affinity"], 1.0), 50000.0)
-        ) / tf.math.log(50000.0)
+        x["affinity"] = normalize_ic50(x["affinity"])
         return x
 
     def _as_dataset(self, *args, **kwargs):
