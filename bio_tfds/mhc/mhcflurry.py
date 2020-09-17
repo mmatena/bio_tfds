@@ -38,17 +38,6 @@ including peptide-MHC binding affinity."""
 
 _MEASUREMENT_INEQUALITIES = ("=", "<", ">")
 
-_SPECIES_PREFIXES = (
-    "HLA",  # Human
-    "Patr",  # Chimpanzee
-    "Gogo",  # Gorilla
-    "Mamu",  # Rhesus macaque
-    "Eqca",  # Horse
-    "BoLA",  # Cow
-    "H-2",  # Mouse
-    "SLA",  # Yeast
-)
-
 
 class MhcflurrySpecies(Enum):
     """All of the species in the dataset.
