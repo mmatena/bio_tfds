@@ -82,14 +82,14 @@ class UniRef50WithPfamRegions(tfds.core.GeneratorBasedBuilder):
             lambda x: x["unique_identifier"],
             num_parallel_calls=tf.data.experimental.AUTOTUNE,
         )
-        ds = ds.prefetch(num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
         return set(
             uniref.UniRef50.extract_uniprot_acc(s) for s in ds.as_numpy_iterator()
         )
 
     def _get_acc_to_regions(self, split, uniref50_acc_set):
         ds = pfam.PfamARegionsUniprot().as_dataset(split=split)
-        ds = ds.prefetch(num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
 
         default_value = lambda: {"pfam_acc": [], "start": [], "end": []}
 
@@ -116,7 +116,7 @@ class UniRef50WithPfamRegions(tfds.core.GeneratorBasedBuilder):
         print("Created a map from UniRef50 accessions to Pfam regions.")
 
         ds = uniref.UniRef50().as_dataset(split=split)
-        ds = ds.prefetch(num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
         for x in ds.as_numpy_iterator():
             acc = x["unique_identifier"]
             x["pfam_regions"] = acc_to_regions[acc]
