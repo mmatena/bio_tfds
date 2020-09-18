@@ -53,10 +53,10 @@ class MhcflurrySpecies(Enum):
         else:
             return getattr(cls, x.upper())
 
-    HUMAN = "HLA"
-    CHIMPANZEE = "Patr"
-    GORILLA = "Gogo"
-    RHESUS_MACAQUE = "Mamu"
+    HUMAN = "HLA"  # 100304 examples
+    CHIMPANZEE = "Patr"  # 2995 examples
+    GORILLA = "Gogo"  # 15 examples
+    RHESUS_MACAQUE = "Mamu"  # 10649 examples
     HORSE = "Eqca"
     COW = "BoLA"
     MOUSE = "H-2"
@@ -83,7 +83,7 @@ def species_from_allele(allele):
 class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
     """Dataset about the binding affinity of peptides to MHC sequences.
 
-    Note that 2699 out of 223214 data points are not included as we do
+    Note that 2699 out of 126645 data points are not included as we do
     not have the sequences for their alleles.
     """
 

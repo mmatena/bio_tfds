@@ -86,6 +86,13 @@ class UniRef50(tfds.core.GeneratorBasedBuilder):
 
     UNSTABLE = "The current_release is updated every 8 weeks."
 
+    @staticmethod
+    def extract_uniprot_acc(unique_identifier):
+        if isinstance(unique_identifier, (str, bytes)):
+            return unique_identifier[len("UniRef50_") :]
+        else:
+            raise ValueError("TODO(mmatena): Support tf.string tensors.")
+
     def __init__(self, data_dir=DEFAULT_TFDS_DATA_DIR, **kwargs):
         super().__init__(data_dir=data_dir, **kwargs)
 
