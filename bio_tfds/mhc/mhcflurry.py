@@ -60,7 +60,7 @@ class MhcflurrySpecies(Enum):
     HORSE = "Eqca"
     COW = "BoLA"
     MOUSE = "H-2"
-    YEAST = "SLA"
+    PIG = "SLA"
 
 
 _PEP_MHC_AFFINITY_URL = "https://raw.githubusercontent.com/iskandr/cd8-tcell-epitope-prediction-data/master/mhcflurry-training-data/peptide-mhc-binding-affinity.csv"

@@ -12,7 +12,7 @@ from bio_tfds.protein import uniref
 class UniRef50WithPfamRegions(tfds.core.GeneratorBasedBuilder):
     """UniRef50 sequences with Pfam regions annotated.
 
-    You must have the UniRef50 and Pfam downloaded and prepared before
+    You must have the UniRef50 and Pfam datsets downloaded and prepared before
     building this dataset.
     """
 
