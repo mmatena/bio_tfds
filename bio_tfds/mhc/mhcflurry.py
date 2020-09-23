@@ -53,7 +53,11 @@ class MhcflurrySpecies(Enum):
         else:
             return getattr(cls, x.upper())
 
+    # These counts only consider equality data.
     HUMAN = "HLA"  # 100304 examples
+    #                   - HLA-A: 72570
+    #                   - HLA-B: 26478
+    #                   - HLA-C: 1219
     CHIMPANZEE = "Patr"  # 2995 examples
     GORILLA = "Gogo"  # 15 examples
     RHESUS_MACAQUE = "Mamu"  # 10649 examples
@@ -80,6 +84,12 @@ def species_from_allele(allele):
     return species
 
 
+def gene_from_allele(allele):
+    species = tf.strings.split(allele, sep="*")
+    species = species[..., 0]
+    return species
+
+
 class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
     """Dataset about the binding affinity of peptides to MHC sequences.
 
@@ -94,6 +104,8 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         normalize_measurement=True,
         include_inequalities=False,
         species=None,
+        genes=None,
+        exclude_genes=None,
         data_dir=DEFAULT_TFDS_DATA_DIR,
         **kwargs,
     ):
@@ -105,6 +117,12 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         self.species = (
             species if not species else [MhcflurrySpecies.parse(s) for s in species]
         )
+        if genes and not isinstance(genes, (list, tuple)):
+            genes = [genes]
+        self.genes = genes
+        if exclude_genes and not isinstance(exclude_genes, (list, tuple)):
+            exclude_genes = [exclude_genes]
+        self.exclude_genes = exclude_genes
 
     def _info(self):
         return tfds.core.DatasetInfo(
@@ -198,6 +216,14 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         x_species = species_from_allele(x["mhc_allele"])
         return tf.reduce_any([tf.equal(s.value, x_species) for s in self.species])
 
+    def _filter_genes_fn(self, x):
+        x_gene = gene_from_allele(x["mhc_allele"])
+        return tf.reduce_any([tf.equal(s, x_gene) for s in self.genes])
+
+    def _filter_exclude_genes_fn(self, x):
+        x_gene = gene_from_allele(x["mhc_allele"])
+        return tf.reduce_all([tf.not_equal(s, x_gene) for s in self.exclude_genes])
+
     def _as_dataset(self, *args, **kwargs):
         ds = super()._as_dataset(*args, **kwargs)
         if not self.include_inequalities:
@@ -209,4 +235,8 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
             )
         if self.species is not None:
             ds = ds.filter(self._filter_species_fn)
+        if self.genes is not None:
+            ds = ds.filter(self._filter_genes_fn)
+        if self.exclude_genes is not None:
+            ds = ds.filter(self._filter_exclude_genes_fn)
         return ds
