@@ -36,7 +36,7 @@ _MHC_BINDING_AFFINITY_DESC = R"""\
 Data for building predictive models of CD8+ T-cell epitopes,
 including peptide-MHC binding affinity."""
 
-_MEASUREMENT_INEQUALITIES = ("=", "<", ">")
+MEASUREMENT_INEQUALITIES = ("=", "<", ">")
 
 
 class MhcflurrySpecies(Enum):
@@ -69,6 +69,7 @@ class MhcflurrySpecies(Enum):
 
 _PEP_MHC_AFFINITY_URL = "https://raw.githubusercontent.com/iskandr/cd8-tcell-epitope-prediction-data/master/mhcflurry-training-data/peptide-mhc-binding-affinity.csv"
 _MHC_SEQUENCE_URL = "https://raw.githubusercontent.com/iskandr/cd8-tcell-epitope-prediction-data/master/mhc-sequences/class1_mhc_sequences.csv"
+_ALIGNED_MHC_SEQUENCE_URL = "https://raw.githubusercontent.com/mmatena/bio_tfds_data/master/mhc_binding/alignments/all.csv"
 
 
 def normalize_ic50(ic50):
@@ -90,6 +91,17 @@ def gene_from_allele(allele):
     return species
 
 
+_VERSION = tfds.core.Version("1.0.0")
+
+
+class MhcBindingAffinityConfig(tfds.core.BuilderConfig):
+    def __init__(self, *, mhc_sequence_url, **kwargs):
+        super().__init__(
+            description=_MHC_BINDING_AFFINITY_DESC, version=_VERSION, **kwargs
+        )
+        self.mhc_sequence_url = mhc_sequence_url
+
+
 class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
     """Dataset about the binding affinity of peptides to MHC sequences.
 
@@ -97,7 +109,15 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
     not have the sequences for their alleles.
     """
 
-    VERSION = tfds.core.Version("1.0.0")
+    BUILDER_CONFIGS = [
+        # Raw MHC sequences.
+        MhcBindingAffinityConfig(name="default", mhc_sequence_url=_MHC_SEQUENCE_URL),
+        # All MHC sequences are aligned so that they are the same length. Note that
+        # the alignment was done using only the alleles with binding data available.
+        MhcBindingAffinityConfig(
+            name="aligned_mhc", mhc_sequence_url=_ALIGNED_MHC_SEQUENCE_URL
+        ),
+    ]
 
     def __init__(
         self,
@@ -127,7 +147,7 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
     def _info(self):
         return tfds.core.DatasetInfo(
             builder=self,
-            description=_MHC_BINDING_AFFINITY_DESC,
+            description=self.builder_config.description,
             features=tfds.features.FeaturesDict(
                 {
                     # Name of MHC allele, e.g. "HLA-A*02:01".
@@ -141,7 +161,7 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
                     # is an upper bound (and a lower bound >). If `include_inequalities`
                     # is False, then only equalities will be included.
                     "measurement_inequality": tfds.features.ClassLabel(
-                        names=_MEASUREMENT_INEQUALITIES
+                        names=MEASUREMENT_INEQUALITIES
                     ),
                     # Amino acid sequence of the peptide.
                     "peptide_sequence": tfds.features.Text(),
@@ -158,7 +178,7 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         extracted_paths = dl_manager.download(
             {
                 "affinity_file": _PEP_MHC_AFFINITY_URL,
-                "mhc_sequence_file": _MHC_SEQUENCE_URL,
+                "mhc_sequence_file": self.builder_config.mhc_sequence_url,
             }
         )
         return [
@@ -205,7 +225,7 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
 
     def _filter_inequalities_fn(self, x):
         return tf.equal(
-            x["measurement_inequality"], _MEASUREMENT_INEQUALITIES.index("=")
+            x["measurement_inequality"], MEASUREMENT_INEQUALITIES.index("=")
         )
 
     def _normalize_measurement_fn(self, x):
