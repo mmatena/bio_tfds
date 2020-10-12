@@ -91,6 +91,12 @@ def gene_from_allele(allele):
     return species
 
 
+def _listify(x):
+    if x and not isinstance(x, (list, tuple)):
+        x = [x]
+    return x
+
+
 _VERSION = tfds.core.Version("1.0.0")
 
 
@@ -126,23 +132,22 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         species=None,
         genes=None,
         exclude_genes=None,
+        alleles=None,
+        exclude_alleles=None,
         data_dir=DEFAULT_TFDS_DATA_DIR,
         **kwargs,
     ):
         super().__init__(data_dir=data_dir, **kwargs)
         self.include_inequalities = include_inequalities
         self.normalize_measurement = normalize_measurement
-        if species and not isinstance(species, (list, tuple)):
-            species = [species]
+        species = _listify(species)
         self.species = (
             species if not species else [MhcflurrySpecies.parse(s) for s in species]
         )
-        if genes and not isinstance(genes, (list, tuple)):
-            genes = [genes]
-        self.genes = genes
-        if exclude_genes and not isinstance(exclude_genes, (list, tuple)):
-            exclude_genes = [exclude_genes]
-        self.exclude_genes = exclude_genes
+        self.genes = _listify(genes)
+        self.exclude_genes = _listify(exclude_genes)
+        self.alleles = _listify(alleles)
+        self.exclude_alleles = _listify(exclude_alleles)
 
     def _info(self):
         return tfds.core.DatasetInfo(
@@ -244,6 +249,14 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
         x_gene = gene_from_allele(x["mhc_allele"])
         return tf.reduce_all([tf.not_equal(s, x_gene) for s in self.exclude_genes])
 
+    def _filter_alleles_fn(self, x):
+        return tf.reduce_any([tf.equal(s, x["mhc_allele"]) for s in self.alleles])
+
+    def _filter_exclude_alleles_fn(self, x):
+        return tf.reduce_all(
+            [tf.not_equal(s, x["mhc_allele"]) for s in self.exclude_alleles]
+        )
+
     def _as_dataset(self, *args, **kwargs):
         ds = super()._as_dataset(*args, **kwargs)
         if not self.include_inequalities:
@@ -259,4 +272,8 @@ class MhcBindingAffinity(tfds.core.GeneratorBasedBuilder):
             ds = ds.filter(self._filter_genes_fn)
         if self.exclude_genes is not None:
             ds = ds.filter(self._filter_exclude_genes_fn)
+        if self.alleles is not None:
+            ds = ds.filter(self._filter_alleles_fn)
+        if self.exclude_alleles is not None:
+            ds = ds.filter(self._filter_exclude_alleles_fn)
         return ds
